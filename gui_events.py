@@ -220,32 +220,7 @@ class EventProcessorGUI:
                          style='Warning.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
             row += 1
         
-        # Проверяем Python библиотеки
-        ttk.Label(self.file_status_frame, text="📚 Библиотеки Python:", style='Header.TLabel').grid(
-            row=row, column=0, sticky=tk.W, pady=(10, 5))
-        row += 1
         
-        libraries = ['pandas', 'docx', 'fuzzywuzzy', 'openpyxl', 'jupyter']
-        for lib in libraries:
-            try:
-                if lib == 'docx':
-                    import docx
-                elif lib == 'fuzzywuzzy': 
-                    import fuzzywuzzy
-                elif lib == 'openpyxl':
-                    import openpyxl
-                elif lib == 'jupyter':
-                    import jupyter
-                else:
-                    __import__(lib)
-                
-                ttk.Label(self.file_status_frame, text=f"✅ {lib}", 
-                         style='Success.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
-            except ImportError:
-                ttk.Label(self.file_status_frame, text=f"❌ {lib} не установлен", 
-                         style='Error.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
-                all_good = False
-            row += 1
         
         # Общий статус
         if all_good:
