@@ -12,8 +12,8 @@ class EventProcessorGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("🚀 Обработчик мероприятий v1.0")
-        self.root.geometry("850x600")
-        self.root.minsize(750, 500)  # Минимальный размер
+        self.root.geometry("700x480")  # Уменьшили с 850x600
+        self.root.minsize(650, 420)    # Уменьшили с 750x500
         self.root.resizable(True, True)
         
         # Центрируем окно
@@ -27,17 +27,17 @@ class EventProcessorGUI:
         self.scripts = {
             '1': {
                 'name': '1.docxtocsv.ipynb',
-                'description': '📄 DOCX → Расписание CSV',
+                'description': '📄 DOCX → CSV',
                 'details': 'Извлекает таблицу из DOCX и создает расписание с занятиями'
             },
             '2': {
                 'name': '3.kod_tipovogo.ipynb', 
-                'description': '🔤 Добавление кодов мероприятий',
+                'description': '🔤 Коды мероприятий',
                 'details': 'Сопоставляет мероприятия с кодами из справочника'
             },
             '3': {
                 'name': '4.dopobrabokta.ipynb',
-                'description': '📊 Финальная обработка Excel',
+                'description': '📊 Финальная обработка',
                 'details': 'Создает отформатированные Excel файлы по мероприятиям'
             }
         }
@@ -49,7 +49,7 @@ class EventProcessorGUI:
         self.create_widgets()
         
         # Проверяем файлы при запуске (автоматически)
-        self.root.after(100, self.check_all_files)  # Через 100мс после запуска
+        self.root.after(100, self.check_all_files)
 
     def center_window(self):
         """Центрирует окно на экране"""
@@ -66,106 +66,121 @@ class EventProcessorGUI:
         style.theme_use('clam')
         
         # Кастомные стили
-        style.configure('Title.TLabel', font=('Segoe UI', 18, 'bold'), foreground='#2c3e50')
-        style.configure('Header.TLabel', font=('Segoe UI', 12, 'bold'), foreground='#34495e')
-        style.configure('Success.TLabel', foreground='#27ae60', font=('Segoe UI', 10))
-        style.configure('Error.TLabel', foreground='#e74c3c', font=('Segoe UI', 10))
-        style.configure('Warning.TLabel', foreground='#f39c12', font=('Segoe UI', 10))
-        style.configure('Big.TButton', font=('Segoe UI', 11, 'bold'), padding=10)
+        style.configure('Title.TLabel', font=('Segoe UI', 16, 'bold'), foreground='#2c3e50')
+        style.configure('Header.TLabel', font=('Segoe UI', 10, 'bold'), foreground='#34495e')
+        style.configure('Success.TLabel', foreground='#27ae60', font=('Segoe UI', 9))
+        style.configure('Error.TLabel', foreground='#e74c3c', font=('Segoe UI', 9))
+        style.configure('Warning.TLabel', foreground='#f39c12', font=('Segoe UI', 9))
+        style.configure('Big.TButton', font=('Segoe UI', 10, 'bold'), padding=(8, 6))
+        style.configure('Small.TButton', font=('Segoe UI', 9), padding=(4, 2))
 
     def create_widgets(self):
         """Создает виджеты интерфейса"""
-        # Главный контейнер
-        main_frame = ttk.Frame(self.root, padding="10")
+        # Главный контейнер с меньшими отступами
+        main_frame = ttk.Frame(self.root, padding="8")
         main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(1, weight=1)
+        main_frame.columnconfigure(0, weight=1)
         
-        # Заголовок с иконкой
+        # Компактный заголовок
         title_frame = ttk.Frame(main_frame)
-        title_frame.grid(row=0, column=0, columnspan=3, pady=(0, 15))
+        title_frame.grid(row=0, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
         
         title_label = ttk.Label(title_frame, text="🚀 Обработчик мероприятий", style='Title.TLabel')
         title_label.pack()
         
-        subtitle_label = ttk.Label(title_frame, text="Автоматическая обработка данных о курсах", 
-                                 font=('Segoe UI', 10), foreground='#7f8c8d')
-        subtitle_label.pack(pady=(5, 0))
+        # Детальный статус системы (компактно)
+        status_frame = ttk.LabelFrame(main_frame, text="📁 Статус системы", padding="6")
+        status_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+        status_frame.columnconfigure(0, weight=1)
         
-        # Фрейм для проверки файлов
-        files_frame = ttk.LabelFrame(main_frame, text="📁 Статус системы", padding="10")
-        files_frame.grid(row=1, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
-        files_frame.columnconfigure(1, weight=1)
+        # Статус notebook файлов
+        self.nb_status_label = ttk.Label(status_frame, text="📓 Notebook файлы: Проверка...", 
+                                        font=('Segoe UI', 9), style='Header.TLabel')
+        self.nb_status_label.grid(row=0, column=0, sticky=tk.W)
         
-        self.file_status_frame = ttk.Frame(files_frame)
-        self.file_status_frame.grid(row=0, column=0, columnspan=3, sticky=(tk.W, tk.E))
+        self.nb_files_label = ttk.Label(status_frame, text="", 
+                                       font=('Segoe UI', 8))
+        self.nb_files_label.grid(row=1, column=0, sticky=tk.W, padx=(15, 0))
         
-        # Основные кнопки действий
-        actions_frame = ttk.LabelFrame(main_frame, text="🚀 Действия", padding="10")
-        actions_frame.grid(row=2, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        # Статус входных файлов  
+        self.input_status_label = ttk.Label(status_frame, text="📄 Входные файлы:", 
+                                           font=('Segoe UI', 9), style='Header.TLabel')
+        self.input_status_label.grid(row=2, column=0, sticky=tk.W, pady=(4, 0))
         
-        # Кнопка полной обработки
-        self.full_process_btn = ttk.Button(actions_frame, text="🎯 Полная обработка (все этапы)", 
+        self.input_files_label = ttk.Label(status_frame, text="", 
+                                          font=('Segoe UI', 8))
+        self.input_files_label.grid(row=3, column=0, sticky=tk.W, padx=(15, 0))
+        
+        # Основные действия - более компактно
+        actions_frame = ttk.LabelFrame(main_frame, text="🚀 Действия", padding="6")
+        actions_frame.grid(row=2, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
+        actions_frame.columnconfigure(0, weight=1)
+        
+        # Главная кнопка
+        self.full_process_btn = ttk.Button(actions_frame, text="🎯 Полная обработка", 
                                           command=self.start_full_process, style='Big.TButton')
-        self.full_process_btn.pack(fill=tk.X, pady=(0, 10))
+        self.full_process_btn.pack(fill=tk.X, pady=(0, 6))
         
-        # Кнопки отдельных этапов
+        # Кнопки этапов в горизонтальном ряду
         stages_frame = ttk.Frame(actions_frame)
-        stages_frame.pack(fill=tk.X, pady=(5, 0))
+        stages_frame.pack(fill=tk.X, pady=(2, 0))
         
         self.stage_buttons = {}
         for i, (num, info) in enumerate(self.scripts.items()):
-            btn = ttk.Button(stages_frame, text=f"Этап {num}: {info['description']}", 
-                           command=lambda n=num: self.start_single_stage(n))
-            btn.pack(fill=tk.X, pady=2)
+            btn = ttk.Button(stages_frame, text=info['description'], 
+                           command=lambda n=num: self.start_single_stage(n),
+                           style='Small.TButton')
+            btn.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 2) if i < len(self.scripts)-1 else 0)
             self.stage_buttons[num] = btn
         
-        # Дополнительные действия
+        # Дополнительные действия в одну строку
         extra_frame = ttk.Frame(actions_frame)
-        extra_frame.pack(fill=tk.X, pady=(15, 0))
+        extra_frame.pack(fill=tk.X, pady=(6, 0))
         
-        ttk.Button(extra_frame, text="📁 Открыть результаты", 
-                  command=self.open_results).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(extra_frame, text="📁 Результаты", 
+                  command=self.open_results, style='Small.TButton').pack(side=tk.LEFT, padx=(0, 4))
         
-        ttk.Button(extra_frame, text="🗑️ Очистить временные", 
-                  command=self.cleanup_files).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(extra_frame, text="🗑️ Очистить", 
+                  command=self.cleanup_files, style='Small.TButton').pack(side=tk.LEFT, padx=(0, 4))
         
         ttk.Button(extra_frame, text="❓ Справка", 
-                  command=self.show_help).pack(side=tk.LEFT)
+                  command=self.show_help, style='Small.TButton').pack(side=tk.LEFT)
         
-        # Прогресс
-        progress_frame = ttk.LabelFrame(main_frame, text="📊 Прогресс", padding="8")
-        progress_frame.grid(row=3, column=0, columnspan=3, sticky=(tk.W, tk.E), pady=(0, 10))
+        # Компактный прогресс
+        progress_frame = ttk.LabelFrame(main_frame, text="📊 Прогресс", padding="6")
+        progress_frame.grid(row=3, column=0, sticky=(tk.W, tk.E), pady=(0, 8))
         progress_frame.columnconfigure(0, weight=1)
         
-        self.status_label = ttk.Label(progress_frame, text="Готов к работе", font=('Segoe UI', 10))
+        self.status_label = ttk.Label(progress_frame, text="Готов к работе", font=('Segoe UI', 9))
         self.status_label.grid(row=0, column=0, sticky=tk.W)
         
         self.progress_bar = ttk.Progressbar(progress_frame, mode='indeterminate')
-        self.progress_bar.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(8, 0))
+        self.progress_bar.grid(row=1, column=0, sticky=(tk.W, tk.E), pady=(4, 0))
         
-        # Лог
-        log_frame = ttk.LabelFrame(main_frame, text="📋 Лог обработки", padding="8")
-        log_frame.grid(row=4, column=0, columnspan=3, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 10))
+        # Компактный лог
+        log_frame = ttk.LabelFrame(main_frame, text="📋 Лог", padding="6")
+        log_frame.grid(row=4, column=0, sticky=(tk.W, tk.E, tk.N, tk.S), pady=(0, 0))
         log_frame.columnconfigure(0, weight=1)
         log_frame.rowconfigure(0, weight=1)
         main_frame.rowconfigure(4, weight=1)
         
-        self.log_text = scrolledtext.ScrolledText(log_frame, height=10, width=80, 
-                                                 font=('Consolas', 9), wrap=tk.WORD)
+        # Уменьшили высоту лога с 10 до 6
+        self.log_text = scrolledtext.ScrolledText(log_frame, height=6, width=70, 
+                                                 font=('Consolas', 8), wrap=tk.WORD)
         self.log_text.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
         
-        # Кнопки для лога
+        # Компактные кнопки для лога
         log_buttons = ttk.Frame(log_frame)
-        log_buttons.grid(row=1, column=0, sticky=tk.W, pady=(10, 0))
+        log_buttons.grid(row=1, column=0, sticky=tk.W, pady=(6, 0))
         
-        ttk.Button(log_buttons, text="💾 Сохранить лог", 
-                  command=self.save_log).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(log_buttons, text="💾 Сохранить", 
+                  command=self.save_log, style='Small.TButton').pack(side=tk.LEFT, padx=(0, 4))
         
-        ttk.Button(log_buttons, text="🗑️ Очистить лог", 
-                  command=self.clear_log).pack(side=tk.LEFT)
+        ttk.Button(log_buttons, text="🗑️ Очистить", 
+                  command=self.clear_log, style='Small.TButton').pack(side=tk.LEFT)
 
     def log_message(self, message, level="INFO"):
         """Добавляет сообщение в лог"""
@@ -182,49 +197,39 @@ class EventProcessorGUI:
         return (self.base_dir / script_name).exists()
 
     def check_all_files(self):
-        """Проверяет все необходимые файлы"""
-        # Очищаем предыдущие статусы
-        for widget in self.file_status_frame.winfo_children():
-            widget.destroy()
-        
-        row = 0
-        all_good = True
-        
+        """Проверяет все необходимые файлы с детальным статусом"""
         # Проверяем notebook файлы
-        ttk.Label(self.file_status_frame, text="📓 Notebook файлы:", style='Header.TLabel').grid(
-            row=row, column=0, sticky=tk.W, pady=(0, 5))
-        row += 1
+        nb_files_status = []
+        all_nb_ok = True
         
         for script_info in self.scripts.values():
             if self.check_script_exists(script_info['name']):
-                ttk.Label(self.file_status_frame, text=f"✅ {script_info['name']}", 
-                         style='Success.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
+                nb_files_status.append(f"✅ {script_info['name']}")
             else:
-                ttk.Label(self.file_status_frame, text=f"❌ {script_info['name']}", 
-                         style='Error.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
-                all_good = False
-            row += 1
+                nb_files_status.append(f"❌ {script_info['name']}")
+                all_nb_ok = False
         
         # Проверяем входные файлы
-        ttk.Label(self.file_status_frame, text="📄 Входные файлы:", style='Header.TLabel').grid(
-            row=row, column=0, sticky=tk.W, pady=(10, 5))
-        row += 1
-        
         input_files = ['test.docx', 'kod_tipovogo.xlsx']
+        input_files_status = []
+        
         for file in input_files:
             if (self.base_dir / file).exists():
-                ttk.Label(self.file_status_frame, text=f"✅ {file}", 
-                         style='Success.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
+                input_files_status.append(f"✅ {file}")
             else:
-                ttk.Label(self.file_status_frame, text=f"⚠️ {file} не найден", 
-                         style='Warning.TLabel').grid(row=row, column=0, sticky=tk.W, padx=(20, 0))
-            row += 1
+                input_files_status.append(f"⚠️ {file} не найден")
         
+        # Обновляем лейблы
+        nb_status_text = "Notebook файлы:" if all_nb_ok else "Notebook файлы: (есть проблемы)"
+        self.nb_status_label.configure(text=f"📓 {nb_status_text}")
+        self.nb_files_label.configure(text="  •  ".join(nb_files_status))
         
+        self.input_status_label.configure(text="📄 Входные файлы:")
+        self.input_files_label.configure(text="  •  ".join(input_files_status))
         
-        # Общий статус
-        if all_good:
-            self.log_message("Система готова к работе! Все файлы найдены.", "SUCCESS")
+        # Логируем общий статус
+        if all_nb_ok:
+            self.log_message("Система готова к работе!", "SUCCESS")
         else:
             self.log_message("Внимание: некоторые файлы отсутствуют", "WARNING")
 
@@ -238,7 +243,7 @@ class EventProcessorGUI:
                 btn.configure(state='disabled')
             self.progress_bar.start()
         else:
-            self.full_process_btn.configure(state='normal', text="🎯 Полная обработка (все этапы)")
+            self.full_process_btn.configure(state='normal', text="🎯 Полная обработка")
             for btn in self.stage_buttons.values():
                 btn.configure(state='normal')
             self.progress_bar.stop()
@@ -264,7 +269,7 @@ class EventProcessorGUI:
             elapsed_time = time.time() - start_time
             
             if result.returncode == 0:
-                self.log_message(f"✅ {description} завершено успешно за {elapsed_time:.1f} сек", "SUCCESS")
+                self.log_message(f"✅ {description} завершено за {elapsed_time:.1f} сек", "SUCCESS")
                 return True
             else:
                 self.log_message(f"❌ Ошибка в {description}: {result.stderr}", "ERROR")
@@ -304,13 +309,13 @@ class EventProcessorGUI:
                     time.sleep(1)  # Пауза между этапами
                 
                 if successful == total:
-                    self.update_status("🎉 Вся обработка завершена успешно!")
+                    self.update_status("🎉 Обработка завершена!")
                     self.root.after(0, lambda: messagebox.showinfo(
                         "Успех!", 
-                        "Обработка завершена успешно!\n\nРезультаты находятся в папке '4.excel_final'"
+                        "Обработка завершена успешно!\n\nРезультаты в папке '4.excel_final'"
                     ))
                 else:
-                    self.update_status(f"⚠️ Обработка завершена с ошибками ({successful}/{total})")
+                    self.update_status(f"⚠️ Завершено с ошибками ({successful}/{total})")
                 
             except Exception as e:
                 self.log_message(f"💥 Критическая ошибка: {e}", "ERROR")
@@ -334,7 +339,7 @@ class EventProcessorGUI:
                 self.set_processing_state(True)
                 
                 if self.run_notebook(script_info['name'], script_info['description']):
-                    self.root.after(0, lambda: messagebox.showinfo("Успех", f"Этап {stage_num} завершен успешно!"))
+                    self.root.after(0, lambda: messagebox.showinfo("Успех", f"Этап {stage_num} завершен!"))
                 else:
                     self.root.after(0, lambda: messagebox.showerror("Ошибка", f"Ошибка в этапе {stage_num}"))
                 
@@ -381,8 +386,8 @@ class EventProcessorGUI:
                 pass
         
         if cleaned > 0:
-            self.log_message(f"🗑️ Очищено {cleaned} временных элементов", "SUCCESS")
-            messagebox.showinfo("Успех", f"Очищено {cleaned} временных файлов")
+            self.log_message(f"🗑️ Очищено {cleaned} элементов", "SUCCESS")
+            messagebox.showinfo("Успех", f"Очищено {cleaned} файлов")
         else:
             messagebox.showinfo("Информация", "Временные файлы не найдены")
 
@@ -407,34 +412,18 @@ class EventProcessorGUI:
 
     def show_help(self):
         """Показывает справку"""
-        help_text = """
-🚀 СПРАВКА ПО ИСПОЛЬЗОВАНИЮ
+        help_text = """🚀 СПРАВКА
 
-📋 ЭТАПЫ ОБРАБОТКИ:
+📋 ЭТАПЫ:
+1️⃣ DOCX → CSV: Извлекает таблицу и создает расписание
+2️⃣ Коды мероприятий: Сопоставляет с справочником  
+3️⃣ Финальная обработка: Создает Excel файлы
 
-1️⃣ DOCX → Расписание CSV
-• Извлекает таблицу из test.docx
-• Создает расписание с занятиями и группами
-• Результат: 1.reordered_file.csv
+📁 ФАЙЛЫ:
+• test.docx - таблица курсов
+• kod_tipovogo.xlsx - справочник кодов
 
-2️⃣ Добавление кодов мероприятий
-• Сопоставляет названия с кодами из kod_tipovogo.xlsx
-• Использует нечеткое сопоставление
-• Результат: 3.new_code.csv
-
-3️⃣ Финальная обработка Excel
-• Разделяет мероприятия на отдельные файлы
-• Форматирует даты и заполняет категории
-• Результат: папка 4.excel_final/
-
-📁 ТРЕБУЕМЫЕ ФАЙЛЫ:
-• test.docx - документ с таблицей курсов
-• kod_tipovogo.xlsx - справочник кодов мероприятий
-• Все 3 .ipynb файла в той же папке
-
-🎯 РЕЗУЛЬТАТ:
-Папка 4.excel_final/ с отформатированными Excel файлами,
-где каждое мероприятие в отдельном файле.
+🎯 РЕЗУЛЬТАТ: Папка 4.excel_final/
         """
         
         messagebox.showinfo("Справка", help_text)
