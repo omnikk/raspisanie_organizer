@@ -23,7 +23,15 @@
 
 python
 
-pip install python-docx pandas
+pip install 
+
+pandas
+python-docx
+fuzzywuzzy
+python-Levenshtein
+openpyxl
+jupyter
+qtconsole
 
 🟫 Использование:
 
